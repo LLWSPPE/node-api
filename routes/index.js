@@ -1,12 +1,6 @@
 var express = require('express');
 const mysql = require("mysql");
-const app = express();
-app.use(express.json());
 const router = express.Router();
-const cors = require("cors");
-const PORT = process.env.PORT || 9000;
-app.listen(PORT, console.log(`Server started on port ${PORT}`));
-app.use(cors());
 
 //connexion bdd sql
 const db = mysql.createConnection({
@@ -16,9 +10,26 @@ const db = mysql.createConnection({
   database: "nathans2_llws",
 });
 
+router.get('/index', (req, res) =>{
+  console.log('SALUT')
+  db.query(
+      "SELECT * FROM cotations",
+      (err, result) => {
+
+        if (err) {
+          res.json({err: err});
+        }
+        if (result.length > 0) {
+          res.json(result);
+        } else {
+          res.json({message: "erreur"});
+        }
+      }
+  );
+})
 
 //login trader
-app.post('/login', (req, res)=> {
+router.post('/login', (req, res)=> {
   const mail = req.body.mail;
   const mdp = req.body.mdp;
   db.query(
