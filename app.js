@@ -41,7 +41,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-http.createServer(app);
 
 app.listen(PORT, console.log(`Server started on port ${PORT}`));
 
