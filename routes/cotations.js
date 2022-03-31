@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql')
 
+const fs = require('fs')
+
 
 const db = mysql.createConnection({
     user: "nathans2_llwsgroup",
@@ -11,7 +13,6 @@ const db = mysql.createConnection({
 });
 
 router.get('/', (req, res) => {
-    console.log('SALUT')
     db.query(
         "SELECT * FROM cotations",
         (err, result) => {
@@ -27,6 +28,7 @@ router.get('/', (req, res) => {
         }
     );
 })
+
 
 module.exports = router;
 

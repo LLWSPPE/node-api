@@ -10,6 +10,7 @@ const http = require('http')
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const cotationsRouter = require('./routes/cotations')
+const adminRouter = require('./routes/admin')
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/cotations', cotationsRouter)
+app.use('/admin', adminRouter)
 
 
 // error handler
