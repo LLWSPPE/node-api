@@ -28,7 +28,7 @@ router.get('/cotations/update', function(req, res, next) {
         //On génère le SQL
         let sqlQuery = "INSERT INTO cotations (isin_code, stock_date, stock_opening_value, stock_closing_value, stock_highest_value, stock_lowest_value, stock_volume) VALUES ?"
         let values = subArray
-        
+
         db.query(sqlQuery, [values], function (err, result) {
             if (err) throw err;
             console.log("Number of records inserted: " + result.affectedRows);

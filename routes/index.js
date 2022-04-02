@@ -2,6 +2,7 @@ var express = require('express');
 const mysql = require("mysql");
 const router = express.Router();
 const bcrypt = require('bcrypt')
+const moment = require('moment')
 
 //connexion bdd sql
 const db = mysql.createConnection({
@@ -56,6 +57,58 @@ router.post('/login', (req, res)=> {
     }
 
 });
+
+router.post('/register', (req, res) =>{
+    let { firstName, lastName, mailAddress, password, confirmPassword } = req.body
+
+    if(!firstName || !lastName || !mailAddress || !password || !confirmPassword){
+        res.json({
+            status: "ERROR",
+            message: "Vous devez remplir tous les champs"
+        })
+    }
+
+    else if(firstName.length < 2 || lastName.length < 2){
+        res.json({
+            status: "ERROR",
+            message: "Votre nom ou prénom doit faire plus de 2 caractères"
+        })
+    }
+
+    else if(password.length < 8){
+        res.json({
+            status: "ERROR",
+            message: "Votre mot de passe doit contenir plus de 8 caractères"
+        })
+    }
+
+    else if(password !== confirmPassword ){
+        res.json({
+            status: "ERROR",
+            message: "Les mots de passe ne correspondent pas"
+        })
+    }
+        bcrypt.genSalt(10, function(err, salt) {
+            bcrypt.hash(password, salt, function(err, hash) {
+
+
+                db.query(
+                    "INSERT INTO user (email, password, first_name, last_name, register_date, responsable, admin, suspendu, dateDebut, dateFin) VALUES (?)",
+                    [[mailAddress, hash, firstName, lastName, moment(Date.now()).format('YYYY-MM-DD'), 0, 0, 0, null, null]],
+                    function(err, result) {
+                        if(err) throw err
+                        res.json({
+                            status: "SUCCESS",
+                            result: result
+                        })
+                    })
+            });
+        });
+
+
+
+
+})
 
 
 module.exports = router;
