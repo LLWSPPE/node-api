@@ -4,6 +4,8 @@ const mysql = require('mysql')
 
 const fs = require('fs')
 
+const { isSessionTokenValid, userHasRole} = require('../middlewares/authentification')
+
 
 const db = mysql.createConnection({
     user: "nathans2_llwsgroup",
@@ -12,11 +14,10 @@ const db = mysql.createConnection({
     database: "nathans2_llws",
 });
 
-router.get('/', (req, res) => {
+router.get('/', [userHasRole('admin')], (req, res) => {
+    console.log('ARRIVE DANS LA ROUTE')
     db.query(
-        "SELECT * FROM cotations",
-        (err, result) => {
-
+        "SELECT * FROM cotations", (err, result) => {
             if (err) {
                 res.json({err: err});
             }
