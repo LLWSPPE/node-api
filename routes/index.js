@@ -62,7 +62,7 @@ router.post('/login', (req, res)=> {
                     })
                 } else {
                     res.json({
-                        status: "Error",
+                        status: "ERROR",
                         message: "Aucun utilisateur n'a été trouvé."
                     })
                 }
