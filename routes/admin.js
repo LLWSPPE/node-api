@@ -1,11 +1,20 @@
 const express = require('express');
 const fs = require("fs");
 const router = express.Router();
+const { userHasRole } = require('../middlewares/authentification')
+const mysql = require("mysql");
 
 /*
     Cette route utilise une fonction qui récupère le fichier de cotation dans /uploads/cotations.
     Elle assigne chaque ligne à un tableau, et chaque ligne dans ce tebleau génère une requête SQL INSERT dans la table 'cotations'
  */
+
+const db = mysql.createConnection({
+    user: "nathans2_llwsgroup",
+    host: "mysql.host696235.onetsolutions.network",
+    password: "ipssi2022?",
+    database: "nathans2_llws",
+});
 
 router.get('/cotations/update', function(req, res, next) {
     fs.readFile('./uploads/cotations/Cotations20220331.txt', 'utf8' , (err, data) => {
@@ -40,5 +49,26 @@ router.get('/cotations/update', function(req, res, next) {
         })
     })
 });
+
+
+router.get('/user/:id', [userHasRole('admin')], (req, res) =>{
+    let { id } = req.params
+
+    db.query('SELECT * FROM user WHERE id = ?', [id], (err, result) =>{
+        if(err) throw err
+        if(result.length > 0){
+            res.json({
+                status: "SUCCESS",
+                result: result
+            })
+        } else {
+            res.json({
+                status: "ERROR",
+                message: "Aucun utilisateur n'a été trouvé."
+            })
+        }
+    })
+})
+
 
 module.exports = router;

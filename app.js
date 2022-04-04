@@ -11,6 +11,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const cotationsRouter = require('./routes/cotations')
 const adminRouter = require('./routes/admin')
+const responsableRouter = require('./routes/responsable')
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/cotations', cotationsRouter)
 app.use('/admin', adminRouter)
+app.use('/responsable', responsableRouter)
 
 
 // error handler
