@@ -2,16 +2,7 @@ const express = require('express');
 const fs = require("fs");
 const router = express.Router();
 const { userHasRole } = require('../middlewares/authentification')
-const mysql = require("mysql");
-
-const db = mysql.createConnection({
-    user: "nathans2_llwsgroup",
-    host: "mysql.host696235.onetsolutions.network",
-    password: "ipssi2022?",
-    database: "nathans2_llws",
-});
-
-
+const db = require('../utils/databaseConnection')
 
 router.post('/user/addBudget', [userHasRole('responsable')], (req, res) =>{
     let { userId, budgetToAdd } = req.body
@@ -30,8 +21,12 @@ router.post('/user/addBudget', [userHasRole('responsable')], (req, res) =>{
     } else {
         db.query('SELECT * FROM user WHERE id = ?', [userId], (err, result) => {
 
-            if(err) throw err
-            if(result.length > 0){
+            if(err) {
+                res.json({
+                    status: "SUCCESS",
+                    result: "Il y a eu une erreur. Veuillez réessayer."
+                })
+            } else if(result.length > 0){
                 console.log(parseFloat(budgetToAdd))
                 db.query("UPDATE user SET budget = ? WHERE id = ?", [result[0]["budget"]+parseFloat(budgetToAdd).toFixed(2), userId], (err, result) =>{
                     if(err) throw err
@@ -62,7 +57,12 @@ router.post('/user/promote', [userHasRole('responsable')], (req, res) =>{
         })
     } else {
         db.query('SELECT * FROM user WHERE id = ?', [userId], (err, result) => {
-            if(result.length > 0){
+            if(err) {
+                res.json({
+                    status: "SUCCESS",
+                    result: "Il y a eu une erreur. Veuillez réessayer."
+                })
+            } else if(result.length > 0){
                 if(result[0]["responsable"] === 1){
                     res.json({
                         status: "ERROR",
@@ -99,7 +99,12 @@ router.post('/user/revoke', [userHasRole('responsable')], (req, res) =>{
         })
     } else {
         db.query('SELECT * FROM user WHERE id = ?', [userId], (err, result) => {
-            if(result.length > 0){
+            if(err) {
+                res.json({
+                    status: "SUCCESS",
+                    result: "Il y a eu une erreur. Veuillez réessayer."
+                })
+            } else if(result.length > 0){
                 if(result[0]["responsable"] === 0){
                     res.json({
                         status: "ERROR",
