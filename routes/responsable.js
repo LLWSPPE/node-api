@@ -245,32 +245,45 @@ router.post('/user/edit', (req, res) =>{
         })
     }
     else {
-        db.query("SELECT * FROM user WHERE email = ?", [email], (err, user) => {
+        db.query("SELECT * FROM user WHERE id = ?", [userId], (err, user) => {
             if(err){
                 res.json({
                     status: "ERROR",
                     message: "Il y a eu une erreur. Veuillez réessayer."
                 })
-            } else if(user.length > 0 && user[0]["id"] !== userId){
+            } else if(user.length <= 0){
                 res.json({
                     status: "ERROR",
-                    message: "Cette adresse mail est déjà utilisée."
+                    message: "Cet utilisateur n'existe pas."
                 })
-            }
-            else {
-               db.query("UPDATE user SET first_name = ?, last_name = ?, email = ? WHERE id = ?", [firstName, lastName, email.toLowerCase(), userId], (err, result) => {
-                   if(err){
-                       res.json({
-                           status: "ERROR",
-                           message: "Il y a eu une erreur. Veuillez réessayer."
-                       })
-                   } else {
-                       res.json({
-                           status: "SUCCESS",
-                           message: "Les informations de cet utilisateur ont bien été modifiées."
-                       })
-                   }
-               })
+            } else {
+
+                db.query("SELECT * FROM user WHERE email = ?", email, (err, result) => {
+                    if(err) { res.json ({ status: "ERROR", message: "Erreur "})}
+                    console.log(result[0]['id'])
+                    console.log(userId)
+                    if(result[0]['id'] !== parseInt(userId)){
+                        res.json({
+                            status: "ERROR",
+                            message: "Cet adresse mail est déjà utilisée."
+                        })
+                    } else {
+                        db.query("UPDATE user SET first_name = ?, last_name = ?, email = ? WHERE id = ?", [firstName, lastName, email.toLowerCase(), userId], (err, result) => {
+                            if(err){
+                                res.json({
+                                    status: "ERROR",
+                                    message: "Il y a eu une erreur. Veuillez réessayer."
+                                })
+                            } else {
+                                res.json({
+                                    status: "SUCCESS",
+                                    message: "Les informations de cet utilisateur ont bien été modifiées."
+                                })
+                            }
+                        })
+                    }
+
+                })
             }
         })
     }
