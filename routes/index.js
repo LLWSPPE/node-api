@@ -65,8 +65,6 @@ router.post('/login', (req, res)=> {
         );
     }
 
-
-
 });
 
 router.post('/register', (req, res) =>{
@@ -109,8 +107,7 @@ router.post('/register', (req, res) =>{
                     status: "ERROR",
                     message: "Il y a eu une erreur. Veuillez réessayer."
                 })
-            }
-            if(user.length > 0){
+            } else if(user.length > 0){
                 res.json({
                     status: "ERROR",
                     message: "Cette adresse mail est déjà utilisée."
@@ -127,6 +124,7 @@ router.post('/register', (req, res) =>{
                                         status: "ERROR",
                                         message: "Il y a eu une erreur. Veuillez réessayer."
                                     })
+
                                 } else {
                                     res.json({
                                         status: "SUCCESS",
@@ -134,7 +132,7 @@ router.post('/register', (req, res) =>{
                                     })
                                 }
 
-                            })
+                        })
                     });
                 });
             }

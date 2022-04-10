@@ -65,7 +65,7 @@ router.get('/users', (req, res) => {
 })
 
 
-router.get('/user/:id', [userHasRole('admin')], (req, res) =>{
+router.get('/user/:id', (req, res) =>{
     let { id } = req.params
 
     db.query('SELECT * FROM user WHERE id = ?', [id], (err, result) =>{
