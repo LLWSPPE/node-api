@@ -38,6 +38,7 @@ router.post('/buy',(req, res)=>{
     }
 
     else {
+
         db.query('SELECT * FROM user WHERE loginToken = ?', userToken, (error, user) =>{
 
             if(error){ res.json({ status: "ERROR", message: "Token de session invalide" })}
