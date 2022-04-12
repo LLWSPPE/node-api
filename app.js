@@ -10,6 +10,9 @@ const http = require('http')
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const cotationsRouter = require('./routes/cotations')
+const adminRouter = require('./routes/admin')
+const responsableRouter = require('./routes/responsable')
+require('dotenv').config()
 
 const app = express();
 
@@ -28,6 +31,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/cotations', cotationsRouter)
+app.use('/admin', adminRouter)
+app.use('/responsable', responsableRouter)
 
 
 // error handler
@@ -41,8 +46,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-http.createServer(app);
 
-app.listen(PORT, console.log(`Server started on port ${PORT}`));
+app.listen(process.env.API_PORT, console.log(`Server started on port ${process.env.API_PORT}`));
 
 module.exports = app;
