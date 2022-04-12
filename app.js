@@ -12,6 +12,7 @@ const usersRouter = require('./routes/users');
 const cotationsRouter = require('./routes/cotations')
 const adminRouter = require('./routes/admin')
 const responsableRouter = require('./routes/responsable')
+require('dotenv').config()
 
 const app = express();
 
@@ -46,6 +47,6 @@ app.use(function(err, req, res, next) {
 });
 
 
-app.listen(PORT, console.log(`Server started on port ${PORT}`));
+app.listen(process.env.API_PORT, console.log(`Server started on port ${process.env.API_PORT}`));
 
 module.exports = app;
