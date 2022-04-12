@@ -9,18 +9,18 @@ router.get('/portefeuille/:userId', function(req, res, next) {
 
   let { userId } = req.params
 
-    db.query('SELECT user_portefeuille.id, user_portefeuille.user_id, user_portefeuille.isin_code, user_portefeuille.quantite, company_labels.full_name, cotations.stock_closing_value FROM user_portefeuille INNER JOIN company_labels ON user_portefeuille.isin_code = company_labels.isin_code INNER JOIN cotations ON cotations.isin_code = company_labels.isin_code WHERE user_portefeuille.user_id = ?', userId, (error, portefeuille) =>{
+    db.query('SELECT user_portefeuille.id, user_portefeuille.user_id, user_portefeuille.isin_code, user_portefeuille.quantite, company_labels.full_name, cotations.stock_closing_value FROM user_portefeuille INNER JOIN company_labels ON user_portefeuille.isin_code = company_labels.isin_code INNER JOIN cotations ON cotations.isin_code = company_labels.isin_code WHERE user_portefeuille.user_id = ?', userId, (error, result) =>{
         if(error){
           res.json({
             status: "ERROR",
             message: "Il y a eu une erreur veuillez réessayer"
           })
         }
-        else if(portefeuille.length > 0) {
+        else if(result.length > 0) {
 
           res.json({
             status: "SUCCESS",
-            portefeuille: portefeuille
+            result: result
           })
 
         }
