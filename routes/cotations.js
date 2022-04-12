@@ -252,6 +252,23 @@ router.post('/sell', (req, res) =>{
 
 })
 
+router.get('/entreprise', (req, res) => {
+    db.query(
+        "SELECT full_name,ticker_code,stock_date,stock_opening_value,stock_closing_value,stock_highest_value,stock_lowest_value,stock_volume FROM company_labels INNER JOIN cotations ON company_labels.isin_code = cotations.isin_code",
+        (err, result) => {
+
+            if (err) {
+                res.json({err: err});
+            }
+            if (result.length > 0) {
+                res.json(result);
+            } else {
+                res.json({message: "erreur"});
+            }
+        }
+    );
+})
+
 
 module.exports = router;
 
