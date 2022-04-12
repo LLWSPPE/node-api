@@ -3,6 +3,7 @@ const fs = require("fs");
 const router = express.Router();
 const { userHasRole } = require('../middlewares/authentification')
 const db = require('../utils/databaseConnection')
+const moment = require('moment')
 
 /*
     Cette route utilise une fonction qui récupère le fichier de cotation dans /uploads/cotations.
@@ -11,7 +12,7 @@ const db = require('../utils/databaseConnection')
 
 
 router.get('/cotations/update', function(req, res, next) {
-    fs.readFile('./uploads/cotations/Cotations20220331.txt', 'utf8' , (err, data) => {
+    fs.readFile('./uploads/cotations/Cotations20220405.txt', 'utf8' , (err, data) => {
         if (err) {
             console.error(err)
             return
@@ -28,19 +29,33 @@ router.get('/cotations/update', function(req, res, next) {
             subArray.push(cotationsArray[i].split(';'))
         }
 
+
+        for(let i = 0; i < subArray.length; i++){
+            subArray[i][1] = moment(subArray[i][1], "DD/MM/YYYY").format("YYYY-MM-DD");
+        }
+
+
+
         //On génère le SQL
         let sqlQuery = "INSERT INTO cotations (isin_code, stock_date, stock_opening_value, stock_closing_value, stock_highest_value, stock_lowest_value, stock_volume) VALUES ?"
         let values = subArray
 
+
         db.query(sqlQuery, [values], function (err, result) {
-            if (err) throw err;
-            console.log("Number of records inserted: " + result.affectedRows);
+            if (err) {
+                res.json({
+                    status: "ERROR",
+                    message: "Il y a eu une erreur"
+                })
+            } else{
+                res.json({
+                    status: "SUCCESS",
+                    result: subArray
+                })
+                console.log("Number of records inserted: " + result.affectedRows);
+            }
         });
 
-        res.json({
-            status: "SUCCESS",
-            result: subArray
-        })
     })
 });
 

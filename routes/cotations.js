@@ -6,9 +6,11 @@ const moment = require('moment')
 
 const { isSessionTokenValid, userHasRole} = require('../middlewares/authentification')
 
+let dateClotureJourPrecedent = moment(Date.now()).subtract(1, 'days').format('YYYY-MM-DD')
 
 router.get('/get', (req, res) => {
-    db.query("SELECT * FROM cotations INNER JOIN company_labels ON cotations.isin_code = company_labels.isin_code", (err, result) => {
+
+    db.query("SELECT * FROM cotations INNER JOIN company_labels ON cotations.isin_code = company_labels.isin_code WHERE stock_date = ?", dateClotureJourPrecedent,(err, result) => {
         if(err) { res.json({ status: "ERROR",  message: "Il y a eu une erreur. Veuillez réessayer." }) }
         else if (result.length > 0) {
             res.json({
@@ -45,7 +47,7 @@ router.post('/buy',(req, res)=>{
 
             else if(user.length > 0) {
 
-                db.query('SELECT * FROM cotations WHERE isin_code = ?', [isinCode], (error, cotation) =>{
+                db.query('SELECT * FROM cotations WHERE isin_code = ? AND stock_date = ?', [isinCode, dateClotureJourPrecedent], (error, cotation) =>{
                     if(error){ res.json({
                             status: "ERROR",
                             message: "Il y a eu une erreur " + error
@@ -53,9 +55,9 @@ router.post('/buy',(req, res)=>{
                     }
                     else if(cotation.length > 0){
 
-                        let prixTotal = parseFloat(quantity * cotation[0]['stock_closing_value'])
+                        let prixTotal = parseFloat(quantity) * parseFloat(cotation[0]['stock_closing_value'])
 
-                        if(parseFloat(user[0]['budget']-prixTotal) < 0){
+                        if(parseFloat(user[0]['budget'])-parseFloat(prixTotal) < 0){
                             res.json({
                                 status: "ERROR",
                                 message: "Vous n'avez pas assez de fonds pour acheter cela "
@@ -70,7 +72,8 @@ router.post('/buy',(req, res)=>{
                                     })
                                 }
                                 else {
-                                    db.query('UPDATE user SET budget = ? WHERE id = ?', [parseFloat(user[0]['budget']-prixTotal), user[0]["id"]], (err, result)=>{
+                                    let budgetFinal = Math.round((parseFloat(user[0]['budget'])-prixTotal) * 100) / 100
+                                    db.query('UPDATE user SET budget = ? WHERE id = ?', [budgetFinal, user[0]["id"]], (err, result)=>{
                                         if(error){
                                             res.json({
                                                 status: "ERROR",
@@ -96,14 +99,15 @@ router.post('/buy',(req, res)=>{
                                                         else{
                                                             res.json({
                                                                 status: "SUCCESS",
-                                                                message: "Vous avez acheté les actions"
+                                                                message: "Vous avez acheté : " + quantity + " titres pour une somme de : " + prixTotal.toString(),
+                                                                budgetFinal: budgetFinal.toString()
                                                             })
                                                         }
                                                     })
                                                 }
                                                 else {
                                                     let quantiteFinale = parseInt(portefeuille[0]['quantite'])+parseInt(quantity)
-                                                    db.query('UPDATE user_portefeuille SET quantite = ? WHERE id = ?', [quantiteFinale, portefeuille[0]['id']], (error, result) =>{
+                                                    db.query('UPDATE user_portefeuille SET quantite = ? WHERE id = ? AND isin_code=?', [quantiteFinale, portefeuille[0]['id'], isinCode], (error, result) =>{
                                                         if(error){
                                                             res.json({
                                                                 status: "ERROR",
@@ -113,7 +117,8 @@ router.post('/buy',(req, res)=>{
                                                         else{
                                                             res.json({
                                                                 status: "SUCCESS",
-                                                                message: "Vous avez acheté les actions"
+                                                                message: "Vous avez acheté : " + quantity + " titres pour une somme de : " + prixTotal.toString() + "",
+                                                                budgetFinal: budgetFinal.toString()
                                                             })
                                                         }
                                                     })
@@ -181,7 +186,20 @@ router.post('/sell', (req, res) =>{
                             })
                         }
                         else {
-                            db.query('UPDATE user_portefeuille SET quantite = ? WHERE id = ?', [quantiteRestante, portefeuille[0]['id']], (error) =>{
+
+                            let requete = "";
+                            let valeurs = []
+
+                            if(quantiteRestante === 0){
+                                requete = "DELETE FROM user_portefeuille WHERE id = ?"
+                                valeurs = [portefeuille[0]['id']]
+                            }
+                            else{
+                                requete = "UPDATE user_portefeuille SET quantite = ? WHERE id = ?"
+                                valeurs = [quantiteRestante, portefeuille[0]['id']]
+                            }
+
+                            db.query(requete, valeurs, (error) =>{
                                 if(error){
                                     res.json({
                                         status: "ERROR",
@@ -189,7 +207,7 @@ router.post('/sell', (req, res) =>{
                                     })
                                 }
                                 else {
-                                    db.query('SELECT * FROM cotations WHERE isin_code = ?', [isinCode], (error, cotation) =>{
+                                    db.query('SELECT * FROM cotations WHERE isin_code = ? AND stock_date = ?', [isinCode, dateClotureJourPrecedent], (error, cotation) =>{
                                         if(error){
                                             res.json({
                                                 status: "ERROR",
@@ -199,7 +217,7 @@ router.post('/sell', (req, res) =>{
                                         else {
 
                                             let montantVente = parseFloat(cotation[0]['stock_closing_value']) * parseFloat(quantity)
-                                            let budgetFinal = parseFloat(user[0]['budget']) + montantVente
+                                            let budgetFinal = Math.round((parseFloat(user[0]['budget']) + montantVente) * 100) / 100;
 
                                             db.query('UPDATE user SET budget = ? WHERE id = ?', [budgetFinal, user[0]['id']], (error)=>{
                                                 if(error){
@@ -222,7 +240,8 @@ router.post('/sell', (req, res) =>{
                                                         else {
                                                             res.json({
                                                                 status: "SUCCESS",
-                                                                message: "Vous avez vendu : " + quantity + " actions, pour un gain de " + montantVente.toString() + "€"
+                                                                message: "Vous avez vendu : " + quantity + " actions, pour un gain de " + montantVente.toString() + "€",
+                                                                budgetAChanger: budgetFinal.toString()
                                                             })
                                                         }
 
