@@ -34,10 +34,10 @@ router.get('/:userId/mouvements/:type?', function(req, res, next) {
   let { userId, type } = req.params
   let mysqlQuery;
 
-  if(type === 'achats'){
+  if(type === '1'){
     mysqlQuery = "SELECT * FROM cotations_mouvements WHERE user_id = ? AND type_mouvement = 'BUY'"
   }
-  if(type === 'ventes'){
+  if(type === '2'){
     mysqlQuery = "SELECT * FROM cotations_mouvements WHERE user_id = ? AND type_mouvement = 'SELL'"
   }
   if(type === undefined){
