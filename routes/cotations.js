@@ -6,12 +6,12 @@ const moment = require('moment')
 
 const { isSessionTokenValid, userHasRole} = require('../middlewares/authentification')
 
-let dateClotureJourPrecedent = moment(Date.now()).subtract(1, 'days').format('YYYY-MM-DD')
+let dateClotureJourPrecedent = moment('2022-04-08').subtract(1, 'days').format('YYYY-MM-DD')
 
 router.get('/get', (req, res) => {
 
     db.query("SELECT * FROM cotations INNER JOIN company_labels ON cotations.isin_code = company_labels.isin_code WHERE stock_date = ?", dateClotureJourPrecedent,(err, result) => {
-        if(err) { res.json({ status: "ERROR",  message: "Il y a eu une erreur. Veuillez réessayer." }) }
+        if(err) { res.json({ status: "ERROR",  message: "Il y a eu une erreur. Veuillez réessayer." + err }) }
         else if (result.length > 0) {
             res.json({
                 status: "SUCCESS",
@@ -99,7 +99,7 @@ router.post('/buy',(req, res)=>{
                                                         else{
                                                             res.json({
                                                                 status: "SUCCESS",
-                                                                message: "Vous avez acheté : " + quantity + " titres pour une somme de : " + prixTotal.toString(),
+                                                                message: "Vous avez acheté : " + quantity + " titres pour une somme de : " + prixTotal.toString() + "€",
                                                                 budgetFinal: budgetFinal.toString()
                                                             })
                                                         }
@@ -117,7 +117,7 @@ router.post('/buy',(req, res)=>{
                                                         else{
                                                             res.json({
                                                                 status: "SUCCESS",
-                                                                message: "Vous avez acheté : " + quantity + " titres pour une somme de : " + prixTotal.toString() + "",
+                                                                message: "Vous avez acheté : " + quantity + " titres pour une somme de : " + prixTotal.toString() + "€",
                                                                 budgetFinal: budgetFinal.toString()
                                                             })
                                                         }
