@@ -51,20 +51,10 @@ router.get('/:userId/mouvements/:type?', function(req, res, next) {
         message: "Il y a eu une erreur veuillez réessayer" + error
       })
     }
-    else if(mouvements.length > 0) {
-
       res.json({
         status: "SUCCESS",
         mouvements: mouvements
       })
-
-    }
-    else {
-      res.json({
-        status: "ERROR",
-        message: "Aucun mouvement trouvé."
-      })
-    }
   })
 
 

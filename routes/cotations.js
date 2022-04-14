@@ -288,6 +288,34 @@ router.get('/entreprise', (req, res) => {
     );
 })
 
+router.get('/historique/:isinCode', (req, res)=>{
+    let { isinCode } = req.params
+
+    db.query('SELECT * FROM cotations WHERE isin_code = ? ORDER BY stock_date', isinCode, (error, result) =>{
+        if(error){
+            res.json({
+                status: "ERROR",
+                message: "Il y a eu une erreur veuillez réessayer"
+            })
+        }
+        else {
+            let valeurs = []
+            for(let i = 0; i < result.length; i++){
+                valeurs.push(result[i]["stock_closing_value"])
+            }
+            
+            let plusGrande = Math.max(...valeurs)
+
+            res.json({
+                status: "SUCCESS",
+                result: result
+            })
+        }
+    })
+
+
+})
+
 
 module.exports = router;
 
