@@ -75,7 +75,7 @@ router.get('/cotations/update', function(req, res, next) {
             } else{
                 res.json({
                     status: "SUCCESS",
-                    result: "Les cotations ont été mises à jour"
+                    message: "Les cotations ont été mises à jour"
                 })
                 console.log("Nombre de lignes insérées: " + result.affectedRows);
             }
