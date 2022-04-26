@@ -3,15 +3,44 @@ const fs = require("fs");
 const router = express.Router();
 const { userHasRole } = require('../middlewares/authentification')
 const db = require('../utils/databaseConnection')
+const moment = require('moment')
 
 /*
     Cette route utilise une fonction qui récupère le fichier de cotation dans /uploads/cotations.
     Elle assigne chaque ligne à un tableau, et chaque ligne dans ce tebleau génère une requête SQL INSERT dans la table 'cotations'
  */
 
+router.post('/cotations/post', (req, res) => {
+
+    //Génération d'un titre de fichier sous la forme : "CotationsANNEEMOISJOUR.txt"
+    let titreFichier = "Cotations"+moment(Date.now()).format('YYYYMMDD');
+
+    //La liste des cotations passée dans le corps de la requête
+    let cotationsTexte = req.body.cotations
+
+    //WriteFile regarde si un fichier porte déjà ce nom, si il n'y en a pas il le crée. Puis on écrit les cotations.
+    fs.writeFile(__dirname+'/../uploads/cotations/'+titreFichier+".txt", cotationsTexte, function (err) {
+        if (err) {
+            res.json({
+                status: "ERROR",
+                message: "Il y a eu une erreur"
+            })
+        }
+        console.log('Le fichier des cotations du jour a été créé et/ou modifié');
+        res.json({
+            status: "SUCCESS",
+            message: "Le fichier des cotations du jour a été créé et/ou modifié, vous pouvez désormais les mettre à jour en cliquant sur le bouton <Mettre à jour>"
+        })
+    });
+
+})
 
 router.get('/cotations/update', function(req, res, next) {
-    fs.readFile('./uploads/cotations/Cotations20220331.txt', 'utf8' , (err, data) => {
+    //Génération d'un titre de fichier sous la forme : "CotationsANNEEMOISJOUR.txt"
+    let titreFichier = "Cotations"+moment(Date.now()).format('YYYYMMDD')+".txt";
+
+    //On lit le fichier dans /uploads/cotations qui porte le titre correspondant aux cotations du jour.
+    fs.readFile('./uploads/cotations/'+titreFichier, 'utf8' , (err, data) => {
         if (err) {
             console.error(err)
             return
@@ -28,19 +57,30 @@ router.get('/cotations/update', function(req, res, next) {
             subArray.push(cotationsArray[i].split(';'))
         }
 
+        for(let i = 0; i < subArray.length; i++){
+            subArray[i][1] = moment(subArray[i][1], "DD/MM/YYYY").format("YYYY-MM-DD");
+        }
+
         //On génère le SQL
         let sqlQuery = "INSERT INTO cotations (isin_code, stock_date, stock_opening_value, stock_closing_value, stock_highest_value, stock_lowest_value, stock_volume) VALUES ?"
         let values = subArray
 
+
         db.query(sqlQuery, [values], function (err, result) {
-            if (err) throw err;
-            console.log("Number of records inserted: " + result.affectedRows);
+            if (err) {
+                res.json({
+                    status: "ERROR",
+                    message: "Il y a eu une erreur"
+                })
+            } else{
+                res.json({
+                    status: "SUCCESS",
+                    message: "Les cotations ont été mises à jour"
+                })
+                console.log("Nombre de lignes insérées: " + result.affectedRows);
+            }
         });
 
-        res.json({
-            status: "SUCCESS",
-            result: subArray
-        })
     })
 });
 
