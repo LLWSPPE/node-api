@@ -280,7 +280,7 @@ exports.getHistory = (req, res) => {
 }
 
 exports.getEnterprises = (req, res) => {
-    const queryGetEnterprises = "SELECT full_name,ticker_code,stock_date,stock_opening_value,stock_closing_value,stock_highest_value,stock_lowest_value,stock_volume FROM company_labels INNER JOIN cotations ON company_labels.isin_code = cotations.isin_code"
+    const queryGetEnterprises = "SELECT full_name,company_labels.isin_code,ticker_code,stock_date,stock_opening_value,stock_closing_value,stock_highest_value,stock_lowest_value,stock_volume FROM company_labels INNER JOIN cotations ON company_labels.isin_code = cotations.isin_code"
 
     db.query(queryGetEnterprises, (err, result) => {
 
