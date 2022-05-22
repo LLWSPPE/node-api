@@ -1,7 +1,7 @@
 const mysql = require('mysql')
 require('dotenv').config()
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     port: 3306,
@@ -9,13 +9,14 @@ const db = mysql.createConnection({
     database: process.env.DB_NAME,
 });
 
-db.connect(function(error) {
-    if (error) {
+db.getConnection(function(err, connection) {
+    if (err) {
         console.error('Erreur lors de la connexion avec la base de données : ' + error.stack);
         return;
     }
 
     console.log('Connecté à la base de données [THREAD] : ' + db.threadId);
 });
+
 
 module.exports = db
